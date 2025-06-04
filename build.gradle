@@ -1,0 +1,39 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group = 'com.ndj.mybatis'
+version = '0.1.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly("org.mybatis:mybatis:3.5.15") {
+        version {
+            strictly("[3.5.0, 4.0.0)")
+        }
+    }
+
+    compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '2.1.0-alpha1'
+
+    compileOnly "org.springframework.boot:spring-boot-autoconfigure:3.5.0"
+    compileOnly "org.springframework.boot:spring-boot-configuration-processor:3.5.0"
+
+    annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:3.5.0"
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.slf4j:slf4j-simple:2.0.12' // 테스트에서는 간단한 콘솔 로그용
+}
+
+test {
+    useJUnitPlatform()
+}
