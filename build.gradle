@@ -3,8 +3,8 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'com.ndj.mybatis'
-version = System.getProperty("version") ?: '0.1.0'
+group = project.hasProperty("group") ? project.getProperty("group") : "com.ndj.mybatis"
+version = project.hasProperty("version") ? project.getProperty("version") : "0.1.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
