@@ -26,6 +26,7 @@ dependencies {
 
     compileOnly "org.springframework.boot:spring-boot-autoconfigure:3.5.0"
     compileOnly "org.springframework.boot:spring-boot-configuration-processor:3.5.0"
+    compileOnly 'org.mybatis.spring.boot:mybatis-spring-boot-autoconfigure:3.0.2'
 
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor:3.5.0"
 
