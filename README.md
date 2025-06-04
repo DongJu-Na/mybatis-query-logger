@@ -22,7 +22,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.깃허브아이디:mybatis-query-logger:버전'
+    implementation 'com.github.DongJu-Na:mybatis-query-logger:버전'
 }
 ```
 
