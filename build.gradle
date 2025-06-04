@@ -37,3 +37,15 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            groupId = project.group
+            artifactId = 'mybatis-query-logger'
+            version = project.version
+        }
+    }
+}
