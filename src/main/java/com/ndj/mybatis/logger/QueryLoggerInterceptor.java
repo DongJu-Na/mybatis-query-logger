@@ -41,10 +41,13 @@ public class QueryLoggerInterceptor implements Interceptor {
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
 
         StringBuilder params = new StringBuilder();
+        Map<String, Object> printed = new java.util.HashMap<>();
         if (parameterMappings != null && parameterObject != null) {
             for (ParameterMapping mapping : parameterMappings) {
                 String name = mapping.getProperty();
+                if (printed.containsKey(name)) continue;
                 Object value = resolveParamValue(parameterObject, name);
+                printed.put(name, value);
                 params.append(name)
                         .append(" = ")
                         .append(value)
@@ -57,12 +60,20 @@ public class QueryLoggerInterceptor implements Interceptor {
         Object result = invocation.proceed();
         long duration = System.currentTimeMillis() - start;
 
-        String output = "\n====== MyBatisQueryLogger ======\nSQL:\n" + sql +
-                "\nPARAMETERS:\n" + params +
-                "DURATION: " + duration + "ms\n================================\n";
+        StringBuilder output = new StringBuilder("\n====== MyBatisQueryLogger ======\n");
+        output.append("SQL:\n").append(sql).append("\n")
+                .append("PARAMETERS:\n").append(params)
+                .append("DURATION: ").append(duration).append("ms\n");
+
+        if (duration > loggerProperties.getSlowQueryThresholdMs()) {
+            output.append("SLOW QUERY DETECTED! Threshold: ")
+                    .append(loggerProperties.getSlowQueryThresholdMs()).append("ms\n");
+        }
+
+        output.append("================================\n");
 
         if (loggerProperties.isUseSlf4j()) {
-            log.info(output);
+            log.info(output.toString());
         } else {
             System.out.println(output);
         }

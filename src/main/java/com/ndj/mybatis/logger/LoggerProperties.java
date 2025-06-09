@@ -17,6 +17,11 @@ public class LoggerProperties {
      */
     private boolean useSlf4j = true;
 
+    /**
+     * 슬로우 쿼리 임계값 (ms 단위, 기본값: 1000)
+     */
+    private long slowQueryThresholdMs = 1000;
+
     public LoggerProperties() {
     }
 
@@ -27,6 +32,9 @@ public class LoggerProperties {
             );
             this.useSlf4j = Boolean.parseBoolean(
                     properties.getProperty("mybatis-query-logger.use-slf4j", String.valueOf(this.useSlf4j))
+            );
+            this.slowQueryThresholdMs = Long.parseLong(
+                    properties.getProperty("mybatis-query-logger.slow-query-threshold-ms", String.valueOf(this.slowQueryThresholdMs))
             );
         }
     }
@@ -45,5 +53,13 @@ public class LoggerProperties {
 
     public void setUseSlf4j(boolean useSlf4j) {
         this.useSlf4j = useSlf4j;
+    }
+
+    public long getSlowQueryThresholdMs() {
+        return slowQueryThresholdMs;
+    }
+
+    public void setSlowQueryThresholdMs(long slowQueryThresholdMs) {
+        this.slowQueryThresholdMs = slowQueryThresholdMs;
     }
 }
