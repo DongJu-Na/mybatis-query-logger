@@ -4,12 +4,14 @@
 
 ## 📌 개요
 
-이 라이브러리는 MyBatis의 SQL 실행 시점에 쿼리문과 바인딩된 파라미터 값을 자동으로 출력해주는 인터셉터입니다.
+Spring Boot + MyBatis 환경에서 실행되는 SQL 쿼리와 파라미터, 실행 시간(SLOW QUERY 포함)을 로깅하는 인터셉터입니다.
 
-- ✅ `application.yml`만으로 자동 적용
-- ✅ `Slf4j` 또는 `System.out` 출력 선택 가능
-- ✅ 실행 시간(ms)까지 로깅
-- ✅ 간편한 종속성 추가로 빠른 적용 가능
+- SQL 쿼리 로그 출력
+- 바인딩된 파라미터 출력
+- 실행 시간(ms) 측정
+- **느린 쿼리(Slow Query)** 감지 기능
+- SLF4J 또는 `System.out.println` 방식 선택 가능
+- Spring Boot 자동 설정 지원 (별도 설정 없음)
 
 ## 🧑‍💻 설치 방법
 
@@ -22,15 +24,16 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.DongJu-Na:mybatis-query-logger:버전'
+    implementation 'com.github.DongJu-Na:mybatis-query-logger:0.0.7'
 }
 ```
 
 ### ⚙️ 설정 방법 (application.yml)
 ```yaml
 mybatis-query-logger:
-  enabled: true           # 기본값 true, false로 비활성화 가능
-  use-slf4j: true         # true: 로그로 출력 / false: System.out 출력
+  enabled: true                # 쿼리 로깅 사용 여부 (기본값: true)
+  use-slf4j: true              # SLF4J 사용 여부 (기본값: true, false면 System.out 출력)
+  slow-query-threshold-ms: 1000  # SLOW QUERY 임계값 (기본값: 1000ms)
 ```
 
 ### 🧾 출력 예시
@@ -47,9 +50,19 @@ DURATION: 5ms
 ```
 
 ## ✅ 사용 조건
-- Spring Boot 3.x 이상
-- MyBatis
+- Spring Boot 3.0 이상
+- MyBatis 3.5 이상
 - Java 17 이상
+
+### 멀티 데이터소스 환경
+
+Spring Boot의 MyBatis 자동 설정을 사용하지 않는 경우 (예: 멀티 데이터소스 설정 시) 
+다음과 같이 수동 등록이 필요합니다.
+
+```java
+factoryBean.setPlugins(new Interceptor[]{new QueryLoggerInterceptor()});
+
+```
 
 ### 📝 기여
 이 프로젝트는 오픈소스입니다.
