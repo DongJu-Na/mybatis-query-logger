@@ -1,21 +1,22 @@
 # MyBatis Query Logger
 
-> MyBatis 쿼리 + 파라미터 자동 로깅 인터셉터
+> MyBatis query + parameter auto-logging interceptor<br/>
+> 👉 [한국어 버전 보기 (Korean)](https://github.com/DongJu-Na/mybatis-query-logger/blob/master/README_KR.md)
 
-## 📌 개요
+## 📌 Overview
 
-Spring Boot + MyBatis 환경에서 실행되는 SQL 쿼리와 파라미터, 실행 시간(SLOW QUERY 포함)을 로깅하는 인터셉터입니다.
+This is an interceptor for Spring Boot + MyBatis environments that automatically logs executed SQL queries, bound parameters, and execution time (including **slow query detection**).
 
-- SQL 쿼리 로그 출력
-- 바인딩된 파라미터 출력
-- 실행 시간(ms) 측정
-- **느린 쿼리(Slow Query)** 감지 기능
-- SLF4J 또는 `System.out.println` 방식 선택 가능
-- Spring Boot 자동 설정 지원 (별도 설정 없음)
+* SQL query logging
+* Bound parameter logging
+* Execution time measurement (in ms)
+* **Slow query detection**
+* Option to choose between SLF4J and `System.out.println`
+* Spring Boot auto-configuration support (zero setup required)
 
-## 🧑‍💻 설치 방법
+## 🧑‍💻 Installation
 
-### Gradle 설정
+### Gradle Setup
 
 ```groovy
 repositories {
@@ -28,15 +29,17 @@ dependencies {
 }
 ```
 
-### ⚙️ 설정 방법 (application.yml)
+### ⚙️ Configuration (application.yml)
+
 ```yaml
 mybatis-query-logger:
-  enabled: true                # 쿼리 로깅 사용 여부 (기본값: true)
-  use-slf4j: true              # SLF4J 사용 여부 (기본값: true, false면 System.out 출력)
-  slow-query-threshold-ms: 1000  # SLOW QUERY 임계값 (기본값: 1000ms)
+  enabled: true                # Enable query logging (default: true)
+  use-slf4j: true              # Use SLF4J (default: true, set false for System.out)
+  slow-query-threshold-ms: 1000  # Threshold for slow query detection (default: 1000ms)
 ```
 
-### 🧾 출력 예시
+## 📟 Output Example
+
 ```vbnet
 ====== MyBatisQueryLogger ======
 SQL:
@@ -49,24 +52,28 @@ DURATION: 5ms
 ================================
 ```
 
-## ✅ 사용 조건
-- Spring Boot 3.0 이상
-- MyBatis 3.5 이상
-- Java 17 이상
+## ✅ Requirements
 
-### 멀티 데이터소스 환경
+* Spring Boot 3.0+
+* MyBatis 3.5+
+* Java 17+
 
-Spring Boot의 MyBatis 자동 설정을 사용하지 않는 경우 (예: 멀티 데이터소스 설정 시) 
-다음과 같이 수동 등록이 필요합니다.
+### In Multi-DataSource Environments
+
+If you are **not** using MyBatis auto-configuration (e.g., in multi-datasource setups), you must manually register the plugin:
 
 ```java
 factoryBean.setPlugins(new Interceptor[]{new QueryLoggerInterceptor()});
-
 ```
 
-### 📝 기여
-이 프로젝트는 오픈소스입니다.
-기능 개선이나 버그 제보는 언제든 Pull Request 또는 Issue로 남겨주세요.
+## 📝 Contributions
 
-### 📄 라이선스
+This is an open-source project.
+Feel free to submit pull requests or issues for feature improvements or bug reports.
+
+## 📄 License
+
 MIT License
+
+---
+
