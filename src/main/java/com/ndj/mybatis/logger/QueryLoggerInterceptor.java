@@ -3,6 +3,7 @@ package com.ndj.mybatis.logger;
 import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.ParameterMapping;
+import org.apache.ibatis.mapping.ParameterMode;
 import org.apache.ibatis.plugin.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +46,12 @@ public class QueryLoggerInterceptor implements Interceptor {
         if (parameterMappings != null && parameterObject != null) {
             for (ParameterMapping mapping : parameterMappings) {
                 String name = mapping.getProperty();
+
+                // out 파라미터 로깅 방지(JDBC 내부에서만 처리하기 때문에 에러 발생 방지를 위해 제외)
+                if (mapping.getMode() == ParameterMode.OUT) continue;
+
                 if (printed.containsKey(name)) continue;
+
                 Object value = resolveParamValue(parameterObject, name);
                 printed.put(name, value);
                 params.append(name)
