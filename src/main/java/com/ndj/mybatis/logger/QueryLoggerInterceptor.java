@@ -47,10 +47,10 @@ public class QueryLoggerInterceptor implements Interceptor {
         Map<String, Object> printed = new HashMap<>();
         StringBuilder params = new StringBuilder();
 
+        // 디버깅: 전체 파라미터 이름 나열
         if (parameterMappings != null && parameterObject != null) {
             for (ParameterMapping mapping : parameterMappings) {
                 String name = mapping.getProperty();
-
                 if (mapping.getMode() == ParameterMode.OUT) continue;
 
                 // 1) 치환용: 중복이어도 무조건 paramValues에 넣음 (순서 보장!)
@@ -70,6 +70,12 @@ public class QueryLoggerInterceptor implements Interceptor {
             }
         }
 
+        // 디버깅: 치환 대상 ? 개수와 paramValues 크기 비교
+        long questionCount = sql.chars().filter(ch -> ch == '?').count();
+        if (questionCount != paramValues.size()) {
+            log.warn("MyBatisQueryLogger - SQL 내 ? 개수와 paramValues 크기가 다릅니다. ? 개수: {}, paramValues.size(): {}", questionCount, paramValues.size());
+        }
+
         Object result = invocation.proceed();
         long duration = System.currentTimeMillis() - start;
 
@@ -78,7 +84,8 @@ public class QueryLoggerInterceptor implements Interceptor {
         // 파라미터 치환 플래그
         if (loggerProperties.isReplaceParameter() && !paramValues.isEmpty()) {
             String replacedSql = replaceSqlParameters(sql, paramValues);
-            output.append("SQL (WITH PARAMS):\n").append(replacedSql).append("\n");
+            output.append("SQL (WITH PARAMS):\n").append(replacedSql).append("\n")
+                    .append("PARAMETERS:\n").append(params);
         } else {
             output.append("SQL:\n").append(sql).append("\n")
                     .append("PARAMETERS:\n").append(params);
@@ -145,11 +152,18 @@ public class QueryLoggerInterceptor implements Interceptor {
         if (parameterObject instanceof Map<?, ?> map) {
             return map.get(fieldName);
         }
+        // MyBatis의 ParamMap(파라미터 래퍼)도 대응
         try {
             Field field = parameterObject.getClass().getDeclaredField(fieldName);
             field.setAccessible(true);
             return field.get(parameterObject);
         } catch (Exception e) {
+            // org.apache.ibatis.binding.MapperProxy$ParamMap 등
+            try {
+                return parameterObject.getClass()
+                        .getMethod("get", Object.class)
+                        .invoke(parameterObject, fieldName);
+            } catch (Exception ignored) {}
             return "[Unavailable]";
         }
     }
