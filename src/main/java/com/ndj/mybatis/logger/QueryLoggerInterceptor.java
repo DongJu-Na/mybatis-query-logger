@@ -49,6 +49,7 @@ public class QueryLoggerInterceptor implements Interceptor {
 
         // 디버깅: 전체 파라미터 이름 나열
         if (parameterMappings != null && parameterObject != null) {
+            /*
             for (ParameterMapping mapping : parameterMappings) {
                 String name = mapping.getProperty();
                 if (mapping.getMode() == ParameterMode.OUT) continue;
@@ -58,6 +59,30 @@ public class QueryLoggerInterceptor implements Interceptor {
                 paramValues.add(value);
 
                 // 2) 출력용: 같은 파라미터 이름은 한 번만 출력
+                if (!printed.containsKey(name)) {
+                    printed.put(name, value);
+                    params.append(name)
+                            .append(" = ")
+                            .append(value)
+                            .append(" (")
+                            .append(value != null ? value.getClass().getSimpleName() : "null")
+                            .append(")\n");
+                }
+            }
+            */
+
+            for (int i = 0; i < parameterMappings.size(); i++) {
+                ParameterMapping mapping = parameterMappings.get(i);
+                String name = mapping.getProperty();
+                if (mapping.getMode() == ParameterMode.OUT) continue;
+
+                Object value = resolveParamValue(parameterObject, name);
+
+                // 디버깅: 몇번째 ?에, 어떤 이름, 어떤 값이 들어가는지 출력
+                System.out.printf("Mapping %d: name=%s, value=%s%n", i, name, value);
+
+                paramValues.add(value);
+
                 if (!printed.containsKey(name)) {
                     printed.put(name, value);
                     params.append(name)
