@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.DongJu-Na:mybatis-query-logger:v0.0.8'
+    implementation 'com.github.DongJu-Na:mybatis-query-logger:0.1.4'
 }
 ```
 
