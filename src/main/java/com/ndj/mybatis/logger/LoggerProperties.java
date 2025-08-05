@@ -22,6 +22,11 @@ public class LoggerProperties {
      */
     private long slowQueryThresholdMs = 1000;
 
+    /**
+     * 파라미터 값을 SQL에 치환해서 보여줄지 여부 (기본값: false)
+     */
+    private boolean replaceParameter = false;
+
     public LoggerProperties() {
     }
 
@@ -35,6 +40,10 @@ public class LoggerProperties {
             );
             this.slowQueryThresholdMs = Long.parseLong(
                     properties.getProperty("mybatis-query-logger.slow-query-threshold-ms", String.valueOf(this.slowQueryThresholdMs))
+            );
+
+            this.replaceParameter = Boolean.parseBoolean(
+                    properties.getProperty("mybatis-query-logger.replace-parameter", String.valueOf(this.replaceParameter))
             );
         }
     }
@@ -62,4 +71,13 @@ public class LoggerProperties {
     public void setSlowQueryThresholdMs(long slowQueryThresholdMs) {
         this.slowQueryThresholdMs = slowQueryThresholdMs;
     }
+
+    public boolean isReplaceParameter() {
+        return replaceParameter;
+    }
+
+    public void setReplaceParameter(boolean replaceParameter) {
+        this.replaceParameter = replaceParameter;
+    }
+
 }

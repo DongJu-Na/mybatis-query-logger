@@ -10,9 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Intercepts({
         @Signature(
@@ -41,19 +40,21 @@ public class QueryLoggerInterceptor implements Interceptor {
         Object parameterObject = boundSql.getParameterObject();
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
 
+        // 파라미터 값 추출 리스트 (OUT 파라미터 제외, 순서 보장)
+        List<Object> paramValues = new ArrayList<>();
+        Map<String, Object> printed = new HashMap<>();
         StringBuilder params = new StringBuilder();
-        Map<String, Object> printed = new java.util.HashMap<>();
         if (parameterMappings != null && parameterObject != null) {
             for (ParameterMapping mapping : parameterMappings) {
                 String name = mapping.getProperty();
 
-                // out 파라미터 로깅 방지(JDBC 내부에서만 처리하기 때문에 에러 발생 방지를 위해 제외)
                 if (mapping.getMode() == ParameterMode.OUT) continue;
-
                 if (printed.containsKey(name)) continue;
 
                 Object value = resolveParamValue(parameterObject, name);
                 printed.put(name, value);
+                paramValues.add(value);
+
                 params.append(name)
                         .append(" = ")
                         .append(value)
@@ -67,9 +68,17 @@ public class QueryLoggerInterceptor implements Interceptor {
         long duration = System.currentTimeMillis() - start;
 
         StringBuilder output = new StringBuilder("\n====== MyBatisQueryLogger ======\n");
-        output.append("SQL:\n").append(sql).append("\n")
-                .append("PARAMETERS:\n").append(params)
-                .append("DURATION: ").append(duration).append("ms\n");
+
+        // 파라미터 치환 플래그
+        if (loggerProperties.isReplaceParameter() && !paramValues.isEmpty()) {
+            String replacedSql = replaceSqlParameters(sql, paramValues);
+            output.append("SQL (WITH PARAMS):\n").append(replacedSql).append("\n");
+        } else {
+            output.append("SQL:\n").append(sql).append("\n")
+                    .append("PARAMETERS:\n").append(params);
+        }
+
+        output.append("DURATION: ").append(duration).append("ms\n");
 
         if (duration > loggerProperties.getSlowQueryThresholdMs()) {
             output.append("SLOW QUERY DETECTED! Threshold: ")
@@ -85,6 +94,39 @@ public class QueryLoggerInterceptor implements Interceptor {
         }
 
         return result;
+    }
+
+    private String replaceSqlParameters(String sql, List<Object> paramValues) {
+        StringBuilder sb = new StringBuilder();
+        int paramIndex = 0;
+        int length = sql.length();
+
+        for (int i = 0; i < length; i++) {
+            char c = sql.charAt(i);
+            if (c == '?' && paramIndex < paramValues.size()) {
+                Object value = paramValues.get(paramIndex++);
+                sb.append(formatParamValue(value));
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    private String formatParamValue(Object value) {
+        if (value == null) {
+            return "null";
+        }
+        if (value instanceof String || value instanceof Character) {
+            return "'" + value + "'";
+        }
+        if (value instanceof java.util.Date date) {
+            // 날짜 포맷 yyyy-MM-dd HH:mm:ss
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            return "'" + sdf.format(date) + "'";
+        }
+        // TODO: 필요에 따라 BigDecimal, Enum 등 처리 추가
+        return value.toString();
     }
 
     private Object resolveParamValue(Object parameterObject, String fieldName) {
