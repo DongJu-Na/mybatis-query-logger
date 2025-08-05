@@ -36,6 +36,7 @@ mybatis-query-logger:
   enabled: true                # Enable query logging (default: true)
   use-slf4j: true              # Use SLF4J (default: true, set false for System.out)
   slow-query-threshold-ms: 1000  # Threshold for slow query detection (default: 1000ms)
+  replace-parameter: true  # Replace '?' with actual parameter values in SQL logs for easy DB tool execution (default : false)
 ```
 
 ## 📟 Output Example
