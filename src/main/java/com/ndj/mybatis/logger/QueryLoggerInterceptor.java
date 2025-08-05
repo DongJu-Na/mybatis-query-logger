@@ -159,7 +159,7 @@ public class QueryLoggerInterceptor implements Interceptor {
      */
     private String formatParamValue(Object value) {
         if (value == null) {
-            return "null";
+            return "'null'";
         }
         if (value instanceof String || value instanceof Character) {
             return "'" + value + "'";
