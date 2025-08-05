@@ -35,6 +35,7 @@ mybatis-query-logger:
   enabled: true                # 쿼리 로깅 사용 여부 (기본값: true)
   use-slf4j: true              # SLF4J 사용 여부 (기본값: true, false면 System.out 출력)
   slow-query-threshold-ms: 1000  # SLOW QUERY 임계값 (기본값: 1000ms)
+  replace-parameter: true  # SQL에 파라미터 값을 치환해서 출력(DB에서 바로 실행 가능) (기본값 false)
 ```
 
 ### 🧾 출력 예시
