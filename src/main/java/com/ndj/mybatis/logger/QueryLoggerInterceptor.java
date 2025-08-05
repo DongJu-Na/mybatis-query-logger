@@ -40,27 +40,33 @@ public class QueryLoggerInterceptor implements Interceptor {
         Object parameterObject = boundSql.getParameterObject();
         List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
 
-        // 파라미터 값 추출 리스트 (OUT 파라미터 제외, 순서 보장)
+        // 1. 파라미터 값 추출 리스트 (OUT 파라미터 제외, 순서 보장)
         List<Object> paramValues = new ArrayList<>();
+
+        // 2. 파라미터 이름별 값 (중복 없는 출력용, printed로 중복 체크)
         Map<String, Object> printed = new HashMap<>();
         StringBuilder params = new StringBuilder();
+
         if (parameterMappings != null && parameterObject != null) {
             for (ParameterMapping mapping : parameterMappings) {
                 String name = mapping.getProperty();
 
                 if (mapping.getMode() == ParameterMode.OUT) continue;
-                if (printed.containsKey(name)) continue;
 
+                // 1) 치환용: 중복이어도 무조건 paramValues에 넣음 (순서 보장!)
                 Object value = resolveParamValue(parameterObject, name);
-                printed.put(name, value);
                 paramValues.add(value);
 
-                params.append(name)
-                        .append(" = ")
-                        .append(value)
-                        .append(" (")
-                        .append(value != null ? value.getClass().getSimpleName() : "null")
-                        .append(")\n");
+                // 2) 출력용: 같은 파라미터 이름은 한 번만 출력
+                if (!printed.containsKey(name)) {
+                    printed.put(name, value);
+                    params.append(name)
+                            .append(" = ")
+                            .append(value)
+                            .append(" (")
+                            .append(value != null ? value.getClass().getSimpleName() : "null")
+                            .append(")\n");
+                }
             }
         }
 
@@ -96,6 +102,9 @@ public class QueryLoggerInterceptor implements Interceptor {
         return result;
     }
 
+    /**
+     * ?를 paramValues 순서대로 치환
+     */
     private String replaceSqlParameters(String sql, List<Object> paramValues) {
         StringBuilder sb = new StringBuilder();
         int paramIndex = 0;
@@ -113,6 +122,9 @@ public class QueryLoggerInterceptor implements Interceptor {
         return sb.toString();
     }
 
+    /**
+     * 파라미터 값의 SQL 표기 변환 (문자열/날짜는 '로 감쌈)
+     */
     private String formatParamValue(Object value) {
         if (value == null) {
             return "null";
@@ -121,11 +133,10 @@ public class QueryLoggerInterceptor implements Interceptor {
             return "'" + value + "'";
         }
         if (value instanceof java.util.Date date) {
-            // 날짜 포맷 yyyy-MM-dd HH:mm:ss
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             return "'" + sdf.format(date) + "'";
         }
-        // TODO: 필요에 따라 BigDecimal, Enum 등 처리 추가
+        // 숫자/boolean 등 기본형은 그냥 toString
         return value.toString();
     }
 
